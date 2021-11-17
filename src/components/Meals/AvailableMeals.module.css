@@ -3,6 +3,12 @@
   color: white;
 }
 
+.mealsError {
+  text-align: center;
+  color: red;
+  background-color: white;
+}
+
 .meals {
   max-width: 60rem;
   width: 90%;
