@@ -10,9 +10,12 @@ const Cart = (props) => {
   const cartContext = useContext(CartContext);
   const totalAmount = `$${cartContext.totalAmount.toFixed(2)}`;
   const hasItems = cartContext.items.length > 0;
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [didSubmit, setDidSubmit] = useState(false);
 
-  const submitOrderHandler = (userData) => {
-    fetch(
+  const submitOrderHandler = async (userData) => {
+    setIsSubmitting(true);
+    await fetch(
       "https://luft-react-food-app-default-rtdb.firebaseio.com/orders.json",
       {
         method: "POST",
@@ -22,6 +25,10 @@ const Cart = (props) => {
         }),
       }
     );
+
+    setIsSubmitting(false);
+    setDidSubmit(true);
+    cartContext.clearCart();
   };
 
   const cartItemRemoveHandler = (id) => {
@@ -64,8 +71,10 @@ const Cart = (props) => {
     </div>
   );
 
-  return (
-    <Modal onHideCart={props.onHideCart}>
+  const isSubmittingModalContent = <p>Finishing the order, please wait...</p>;
+
+  const cartModalContent = (
+    <>
       {cartItems}
       <div className={classes.total}>
         <span>Total Amount</span>
@@ -75,6 +84,25 @@ const Cart = (props) => {
         <Checkout onConfirm={submitOrderHandler} onCancel={props.onHideCart} />
       )}
       {!isCheckout && modalButtons}
+    </>
+  );
+
+  const didSubmitModalContent = (
+    <>
+      <p>Successfully finished the order.</p>
+      <div className={classes.actions}>
+        <button className={classes["button--alt"]} onClick={props.onHideCart}>
+          Close
+        </button>
+      </div>
+    </>
+  );
+
+  return (
+    <Modal onHideCart={props.onHideCart}>
+      {!isSubmitting && !didSubmit && cartModalContent}
+      {isSubmitting && isSubmittingModalContent}
+      {didSubmit && didSubmitModalContent}
     </Modal>
   );
 };
